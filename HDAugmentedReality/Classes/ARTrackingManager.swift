@@ -61,6 +61,12 @@ public class ARTrackingManager: NSObject, CLLocationManagerDelegate
      */
     public var pitchFilterFactor: Double = 0.05
     
+    /** Flag to enable and disable heading correction for yaw/roll.  Without this flag, heading changes when the
+        device is twisted away from the horizontal or vertical, and annotation positions change even though the device
+        is still 'pointed' in the same direction.
+    */
+    public var yawAndRollCorrection: Bool = true
+    
     //===== Internal variables
     /// Delegate
     internal weak var delegate: ARTrackingManagerDelegate?
@@ -250,6 +256,10 @@ public class ARTrackingManager: NSObject, CLLocationManagerDelegate
             self.heading = fmod(newHeading.trueHeading, 360.0)
         }
         
+        if self.yawAndRollCorrection {
+            self.correctForYawAndRoll()
+        }
+        
         /** 
          Handling unprecise readings, this whole section should prevent annotations from spinning because of
          unprecise readings & filtering. e.g. if first reading is 10° and second is 80°, due to filtering, annotations
@@ -371,6 +381,40 @@ public class ARTrackingManager: NSObject, CLLocationManagerDelegate
     //==========================================================================================================================================================
     // MARK:                                                        Calculations
     //==========================================================================================================================================================
+    
+    
+    internal func correctForYawAndRoll() {
+        let quat = (self.motionManager.deviceMotion?.attitude.quaternion)!
+        var yaw = 2*(quat.x*quat.y + quat.w*quat.z);
+        var roll = atan2(2*(quat.y*quat.w - quat.x*quat.z), 1 - 2*quat.y*quat.y - 2*quat.z*quat.z)
+        
+        yaw = yaw * 180.0/Double.pi
+        roll = roll * 180.0/Double.pi
+        print("Yaw is @f deg", yaw)
+        print("Roll is @f deg", roll)
+        let deviceOrientation = self.orientation
+        if deviceOrientation == CLDeviceOrientation.portrait
+        {
+            let correction = cos((self.motionManager.deviceMotion?.attitude.roll)!) * roll
+            print("Correction is ", correction)
+            print("Corrected: ", self.heading - roll)
+            self.heading = fmod(self.heading - roll, 360.0)
+        }
+        else if deviceOrientation == CLDeviceOrientation.portraitUpsideDown
+        {
+            //angle = atan2(-self.previousAcceleration.y, self.previousAcceleration.z)
+        }
+        else if deviceOrientation == CLDeviceOrientation.landscapeLeft
+        {
+            //angle = atan2(self.previousAcceleration.x, self.previousAcceleration.z)
+        }
+        else if deviceOrientation == CLDeviceOrientation.landscapeRight
+        {
+            //angle = atan2(-self.previousAcceleration.x, self.previousAcceleration.z)
+        }
+        
+    }
+
     
     /// Returns filtered(low-pass) pitch in degrees. -90(looking down), 0(looking straight), 90(looking up)
     internal func filterPitch()
