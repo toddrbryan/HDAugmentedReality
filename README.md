@@ -4,6 +4,9 @@
 
 Augmented Reality component for iOS, written in Swift 3.0.
 
+This is not the original repo.  This repo has been forked from the original author's repo at:
+https://github.com/DanijelHuis/HDAugmentedReality
+
 Version history:
 - 2.0.0: written in swift 3.0, iOS 8+
 - 1.1.x: written in Swift 3.0, iOS 8+
@@ -28,6 +31,9 @@ Altitudes of POIs are disregarded.
 - Simulator debugging and debugging with map controller
 - Configurable vertical offset by distance
 
+## Changes vs. Danijel Huis's repo
+- roll/yaw compensation for heading calculation
+
 ## Dependencies & Requirements
 
 - CoreLocation.Framework
@@ -42,6 +48,7 @@ Xcode 8 is needed for Swift 3.
 - Add native frameworks listed in “Dependencies & Requirements”
 - Add NSLocationWhenInUseUsageDescription to Info.plist. This is needed for location authorization.
 - Add NSCameraUsageDescription to Info.plist. This is needed for camera authorization.
+
 
 ## CocoaPods
 
