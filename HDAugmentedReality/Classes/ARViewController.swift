@@ -9,6 +9,8 @@
 import UIKit
 import AVFoundation
 import CoreLocation
+import CoreMotion
+import CoreGraphics
 
 /**
  *      Augmented reality view controller.
@@ -394,6 +396,31 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
         self.onDidFailToFindLocation?(elapsedSeconds, self.lastLocation != nil)
     }
     
+    internal func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateDeviceAttitude quat: CMQuaternion) {
+        var yaw = 2*(quat.x*quat.y + quat.w*quat.z);
+        var roll = atan2(2*(quat.y*quat.w - quat.x*quat.z), 1 - 2*quat.y*quat.y - 2*quat.z*quat.z)
+        var pitch = atan2(2*(quat.x*quat.w + quat.y*quat.z), 1 - 2*quat.x*quat.x - 2*quat.z*quat.z)
+        
+        yaw = yaw * 180.0/Double.pi
+        roll = roll * 180.0/Double.pi
+        print("Yaw is @f deg", yaw)
+        print("Roll is @f deg", roll)
+        
+        let pitchYOffset = CGFloat(self.arStatus.pitch * self.arStatus.vPixelsPerDegree)
+        let context = UIGraphicsGetCurrentContext()
+        context?.setStrokeColor(UIColor.red.cgColor)
+        
+        context?.beginPath()
+        context?.move(to: CGPoint(x: 0, y: pitchYOffset))
+        context?.addLine(to: CGPoint(x: view.frame.maxX, y:pitchYOffset))
+        context?.strokePath()
+
+//        if (UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation)) {
+//            
+//        }
+
+    }
+    
     //==========================================================================================================================================================
     // MARK:                                                        Camera
     //==========================================================================================================================================================
@@ -724,6 +751,9 @@ open class ARViewController: UIViewController, ARTrackingManagerDelegate
         public var setUserLocationToCenterOfAnnotations = false;
         /// Enables/Disables close button.
         public var closeButtonEnabled = true
+        ///
+        public var horizonLine = true
+        public var dropLines = true
     }
 }
 

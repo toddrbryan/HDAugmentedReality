@@ -17,6 +17,7 @@ import GLKit
     @objc optional func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateUserLocation location: CLLocation)
     @objc optional func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateReloadLocation location: CLLocation)
     @objc optional func arTrackingManager(_ trackingManager: ARTrackingManager, didFailToFindLocationAfter elapsedSeconds: TimeInterval)
+    @objc optional func arTrackingManager(_ trackingManager: ARTrackingManager, didUpdateDeviceAttitude quaternion: CMQuaternion)
     
     @objc optional func logText(_ text: String)
 }
@@ -259,6 +260,9 @@ public class ARTrackingManager: NSObject, CLLocationManagerDelegate
         if self.yawAndRollCorrection {
             self.correctForYawAndRoll()
         }
+        
+        let quat = (self.motionManager.deviceMotion?.attitude.quaternion)!
+        self.delegate?.arTrackingManager?(self, didUpdateDeviceAttitude: quat)
         
         /** 
          Handling unprecise readings, this whole section should prevent annotations from spinning because of
